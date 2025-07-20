@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise do Problema do Caixeiro Viajante</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #121212;
+            color: #FFFFFF;
+            transition: background-color 0.3s ease;
+        }
+
+        .font-arcade {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+        }
+
+        .tab-button.active {
+            background-color: #2bff00;
+            color: #121212;
+            font-weight: 700;
+        }
+
+        .tab-button {
+            transition: all 0.2s ease-in-out;
+            color: #FFFFFF;
+        }
+
+        .tab-button:hover:not(.active) {
+            background-color: rgba(43, 255, 0, 0.1);
+        }
+
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .loader {
+            border: 4px solid #333;
+            border-top: 4px solid #2bff00;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Estilos de slider aprimorados */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #4a4a4a;
+            border-radius: 5px;
+            outline: none;
+            transition: background 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            background: #2bff00;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            background: #2bff00;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        input[type="range"]:hover::-webkit-slider-thumb {
+            transform: scale(1.1);
+        }
+
+        input[type="range"]:hover::-moz-range-thumb {
+            transform: scale(1.1);
+        }
+
+        /* Foco visível para acessibilidade */
+        button:focus-visible,
+        input[type="range"]:focus-visible {
+            outline: 2px solid #2bff00;
+            outline-offset: 3px;
+        }
+    </style>
+</head>
+
+<body class="bg-[#121212] text-[#FFFFFF]">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-arcade text-[#2bff00]">O Problema do Caixeiro Viajante</h1>
+            <p class="mt-4 text-lg text-slate-300">Uma análise interativa de abordagens algorítmicas</p>
+        </header>
+
+        <main>
+            <section id="introduction" class="bg-[#1a1a1a] border border-gray-700 p-6 rounded-xl shadow-lg mb-8">
+                <h2 class="text-2xl font-arcade text-[#ff008a] mb-4">O Desafio das Rotas</h2>
+                <p class="text-slate-300 leading-relaxed">
+                    O Problema do Caixeiro Viajante (PCV) é um dos quebra-cabeças mais notórios da ciência da
+                    computação. O objetivo é simples: dada uma lista de cidades, encontrar a rota mais curta possível
+                    que visite cada cidade exatamente uma vez e retorne ao ponto de origem, ou seja, 
+                    o objetivo é formar um circuito hamiltoniano. Embora fácil de entender,
+                    encontrar a solução perfeita é uma tarefa de complexidade exponencial, tornando a força bruta
+                    inviável para um número crescente de cidades. Exploramos as duas abordagens clássicas para
+                    resolver o PCV: a heurística <strong class="font-bold text-[#ff008a]">Gulosa</strong>, que busca uma
+                    solução rápida, e o algoritmo de <strong class="font-bold text-[#2bff00]">Backtracking</strong>, que
+                    garante encontrar a rota ótima através de uma busca inteligente.
+                </p>
+            </section>
+
+            <section id="interactive-lab" class="bg-[#1a1a1a] border border-gray-700 p-6 rounded-xl shadow-lg">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div id="controls-and-explanation">
+                        <h2 class="text-2xl font-arcade text-[#ff008a] mb-4">Arena de Algoritmos</h2>
+
+                        <div class="bg-[#2a2a2a] p-4 rounded-lg mb-6">
+                            <label for="city-slider" class="block font-medium text-slate-200 mb-2">Número de Cidades:
+                                <span id="city-count" class="font-bold text-[#2bff00]">8</span></label>
+                            <input type="range" id="city-slider" min="3" max="15" value="8" class="w-full">
+                            <button id="reset-cities"
+                                class="mt-4 w-full bg-[#ff008a] hover:opacity-90 text-white font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-105">
+                                Gerar Novas Cidades
+                            </button>
+                        </div>
+
+                        <div class="mb-4 border-b border-gray-700">
+                            <nav class="flex space-x-1" aria-label="Tabs">
+                                <button class="tab-button active font-semibold px-4 py-2 rounded-t-lg"
+                                    data-tab="problem">O Problema</button>
+                                <button class="tab-button font-semibold px-4 py-2 rounded-t-lg"
+                                    data-tab="greedy">Guloso</button>
+                                <button class="tab-button font-semibold px-4 py-2 rounded-t-lg"
+                                    data-tab="backtracking">Backtracking</button>
+                            </nav>
+                        </div>
+
+                        <div id="tab-content">
+                        </div>
+                    </div>
+
+                    <div id="visualization"
+                        class="flex flex-col items-center justify-center bg-[#000000] rounded-lg p-2 min-h-[350px] lg:min-h-[500px] border border-gray-700">
+                        <canvas id="tsp-canvas" class="rounded-md w-full h-full"></canvas>
+                        <div id="loader-container" class="absolute hidden flex-col items-center">
+                            <div class="loader"></div>
+                            <p class="mt-2 text-slate-300 font-medium">Calculando...</p>
+                        </div>
+                        <p id="cost-display" class="mt-2 text-lg font-medium text-slate-200"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="comparison" class="mt-8 bg-[#1a1a1a] border border-gray-700 p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-arcade text-center text-[#ff008a] mb-2">Análise de Desempenho</h2>
+                <p class="text-slate-400 text-center max-w-2xl mx-auto mb-6">Este gráfico exibe o custo total da rota
+                    (distância) encontrada por cada algoritmo. Observe como a solução rápida, porém imprecisa, do método
+                    <strong class="text-[#ff008a]">Guloso</strong> se compara com a solução ótima garantida pelo <strong
+                        class="text-[#2bff00]">Backtracking</strong>.</p>
+                <div class="chart-container mx-auto">
+                    <canvas id="results-chart"></canvas>
+                </div>
+                <div class="mt-8 overflow-x-auto">
+                    <table class="min-w-full bg-[#1a1a1a] border border-gray-700">
+                    </table>
+                </div>
+            </section>
+
+            <footer class="pt-8 text-center text-slate-500">
+                <p>Projeto de Análise de Algoritmos &copy; 2024</p>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('tsp-canvas');
+            const ctx = canvas.getContext('2d');
+            const citySlider = document.getElementById('city-slider');
+            const cityCountSpan = document.getElementById('city-count');
+            const resetCitiesBtn = document.getElementById('reset-cities');
+            const runGreedyBtn = document.getElementById('run-greedy');
+            const runBacktrackingBtn = document.getElementById('run-backtracking');
+            const costDisplay = document.getElementById('cost-display');
+            const loader = document.getElementById('loader-container');
+            const tabContentContainer = document.getElementById('tab-content');
+
+            // Definindo o conteúdo das abas dinamicamente para manter o HTML mais limpo
+            const tabContents = {
+                problem: `
+                    <h3 class="text-xl font-semibold mb-2 text-[#2bff00]">O que é o Problema do Caixeiro Viajante?</h3>
+                    <p class="text-slate-300 mb-4">Imagine que um caixeiro viajante precisa visitar um conjunto de cidades. Ele começa em uma cidade de origem, deve passar por <strong class="text-slate-100">todas as outras cidades exatamente uma vez</strong> e, no final, retornar ao ponto de partida. O desafio é encontrar a rota que minimiza a distância total percorrida. Parece simples, mas é um dos problemas mais famosos da otimização combinatória.</p>
+                    <h4 class="font-semibold text-slate-100 mt-4">Por que é tão difícil?</h4>
+                    <p class="text-slate-300">O número de rotas possíveis cresce de forma fatorial. Para N cidades, existem <code class="bg-gray-700 text-sm p-1 rounded">(N-1)! / 2</code> rotas únicas. Para apenas 10 cidades, já são 181.440 rotas! Testar todas (força bruta) se torna inviável muito rapidamente.</p>`,
+                greedy: `
+                    <h3 class="text-xl font-semibold mb-2 text-[#ff008a]">Abordagem Gulosa (Heurística)</h3>
+                    <p class="text-slate-300 mb-4">A abordagem gulosa é uma heurística simples e rápida. A lógica é: a partir da cidade atual, <strong class="text-slate-100">sempre escolha a cidade mais próxima que ainda não foi visitada</strong>. Repita isso até que todas as cidades tenham sido visitadas e então retorne à cidade inicial.</p>
+                    <p class="text-slate-300"><strong>Vantagens:</strong> Extremamente rápida e fácil de implementar.</p>
+                    <p class="text-slate-300"><strong>Desvantagens:</strong> Quase nunca encontra a melhor rota. Faz escolhas "boas" a curto prazo que podem levar a um resultado final ruim.</p>
+                    <button id="run-greedy-inner" class="mt-4 w-full bg-[#ff008a] hover:opacity-90 text-white font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-105">
+                        Executar Algoritmo Guloso
+                    </button>`,
+                backtracking: `
+                    <h3 class="text-xl font-semibold mb-2 text-[#2bff00]">Abordagem com Backtracking</h3>
+                    <p class="text-slate-300 mb-4">O backtracking é uma técnica que busca a solução ótima de forma sistemática. Ele constrói um caminho passo a passo. Se um caminho parcial já for mais longo que a melhor solução encontrada até agora, ele <strong class="text-slate-100">"poda"</strong> essa ramificação da busca e <strong class="text-slate-100">"volta atrás" (backtracks)</strong> para tentar uma rota diferente.</p>
+                    <p class="text-slate-300"><strong>Vantagens:</strong> Garante encontrar a solução ótima, sendo muito mais eficiente que a força bruta.</p>
+                    <p class="text-slate-300"><strong>Desvantagens:</strong> Para um número maior de cidades (>15), seu tempo de execução se torna proibitivo.</p>
+                    <button id="run-backtracking-inner" class="mt-4 w-full bg-[#2bff00] hover:opacity-90 text-[#121212] font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-105">
+                        Executar Backtracking (lento para >10 cidades)
+                    </button>`
+            };
+
+            let cities = [];
+            let distMatrix = [];
+            let numCities = 8;
+            const greedyColor = '#ff008a';
+            const backtrackingColor = '#2bff00';
+            let resultsChart;
+
+            function initChart() {
+                Chart.defaults.color = '#FFFFFF';
+                Chart.defaults.borderColor = '#4a4a4a';
+
+                const chartCanvas = document.getElementById('results-chart');
+                resultsChart = new Chart(chartCanvas, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Custo Guloso', 'Custo Backtracking'],
+                        datasets: [{
+                            label: 'Custo da Rota',
+                            data: [0, 0],
+                            backgroundColor: [`${greedyColor}B3`, `${backtrackingColor}B3`], // B3 = 70% alpha
+                            borderColor: [greedyColor, backtrackingColor],
+                            borderWidth: 2,
+                            borderRadius: 4,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#121212',
+                                titleFont: { size: 14, family: "'Space Grotesk', sans-serif" },
+                                bodyFont: { size: 12, family: "'Space Grotesk', sans-serif" },
+                                boxPadding: 8,
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Custo Total da Rota (Distância)', color: '#FFFFFF', font: { size: 14 } },
+                                grid: { color: '#4a4a4a' },
+                                ticks: { color: '#FFFFFF' }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: '#FFFFFF', font: { size: 12 } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateChart(greedyCost, backtrackingCost) {
+                if (!resultsChart) return;
+                resultsChart.data.datasets[0].data[0] = greedyCost;
+                resultsChart.data.datasets[0].data[1] = backtrackingCost;
+                resultsChart.update();
+            }
+
+            function resizeCanvas() {
+                const visContainer = document.getElementById('visualization');
+                canvas.width = visContainer.clientWidth - 16;
+                canvas.height = visContainer.clientHeight - 40;
+                drawCities();
+            }
+
+            function generateCities() {
+                cities = [];
+                const padding = 30;
+                for (let i = 0; i < numCities; i++) {
+                    cities.push({
+                        x: Math.random() * (canvas.width - 2 * padding) + padding,
+                        y: Math.random() * (canvas.height - 2 * padding) + padding
+                    });
+                }
+                calculateDistances();
+                drawCities();
+                costDisplay.innerHTML = '&nbsp;'; // Placeholder to maintain height
+                updateChart(0, 0);
+            }
+
+            function calculateDistances() {
+                distMatrix = [];
+                for (let i = 0; i < numCities; i++) {
+                    distMatrix[i] = [];
+                    for (let j = 0; j < numCities; j++) {
+                        const dx = cities[i].x - cities[j].x;
+                        const dy = cities[i].y - cities[j].y;
+                        distMatrix[i][j] = Math.sqrt(dx * dx + dy * dy);
+                    }
+                }
+            }
+
+            function drawCities() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = backtrackingColor;
+                for (let i = 0; i < cities.length; i++) {
+                    ctx.beginPath();
+                    ctx.arc(cities[i].x, cities[i].y, 8, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.fillStyle = '#121212';
+                    ctx.font = 'bold 12px "Space Grotesk"';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(i, cities[i].x, cities[i].y);
+                    ctx.fillStyle = backtrackingColor;
+                }
+            }
+
+            function drawPath(path, color, lineWidth = 3) {
+                if (path.length < 2) return;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = lineWidth;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.beginPath();
+                ctx.moveTo(cities[path[0]].x, cities[path[0]].y);
+                for (let i = 1; i < path.length; i++) {
+                    ctx.lineTo(cities[path[i]].x, cities[path[i]].y);
+                }
+                if (path.length === numCities) {
+                    ctx.lineTo(cities[path[0]].x, cities[path[0]].y);
+                }
+                ctx.stroke();
+            }
+
+            async function runAlgorithm(algoFn) {
+                showLoader(true);
+                // Allow UI to update before blocking
+                await new Promise(resolve => setTimeout(resolve, 20));
+                await algoFn();
+                showLoader(false);
+            }
+
+            async function greedyRunner() {
+                let unvisited = new Set(Array.from({ length: numCities - 1 }, (_, i) => i + 1));
+                let path = [0];
+                let currentCity = 0;
+                let totalCost = 0;
+
+                while (unvisited.size > 0) {
+                    let nearestCity = -1;
+                    let minDist = Infinity;
+
+                    for (const city of unvisited) {
+                        if (distMatrix[currentCity][city] < minDist) {
+                            minDist = distMatrix[currentCity][city];
+                            nearestCity = city;
+                        }
+                    }
+
+                    totalCost += minDist;
+                    path.push(nearestCity);
+                    unvisited.delete(nearestCity);
+                    currentCity = nearestCity;
+
+                    drawCities();
+                    drawPath(path, greedyColor, 3);
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                totalCost += distMatrix[path[path.length - 1]][path[0]];
+                drawCities();
+                drawPath(path, greedyColor, 3);
+
+                costDisplay.innerHTML = `<span style="color:${greedyColor}">Custo Guloso:</span> ${totalCost.toFixed(2)}`;
+                updateChart(totalCost, resultsChart.data.datasets[0].data[1]);
+            }
+
+            async function backtrackingRunner() {
+                let bestPath = [];
+                let minCost = Infinity;
+
+                function solve(currentPath, currentCost) {
+                    if (currentPath.length === numCities) {
+                        const totalCost = currentCost + distMatrix[currentPath[currentPath.length - 1]][currentPath[0]];
+                        if (totalCost < minCost) {
+                            minCost = totalCost;
+                            bestPath = [...currentPath];
+                        }
+                        return;
+                    }
+
+                    for (let i = 0; i < numCities; i++) {
+                        if (!currentPath.includes(i)) {
+                            const newCost = currentCost + distMatrix[currentPath[currentPath.length - 1]][i];
+                            if (newCost < minCost) {
+                                currentPath.push(i);
+                                solve(currentPath, newCost);
+                                currentPath.pop();
+                            }
+                        }
+                    }
+                }
+
+                solve([0], 0);
+
+                drawCities();
+                drawPath(bestPath, backtrackingColor, 4);
+
+                costDisplay.innerHTML = `<span style="color:${backtrackingColor}">Custo Ótimo (Backtracking):</span> ${minCost.toFixed(2)}`;
+                updateChart(resultsChart.data.datasets[0].data[0], minCost);
+            }
+
+            function setupTabs() {
+                const tabs = document.querySelectorAll('.tab-button');
+
+                function switchTab(tab) {
+                    tabs.forEach(item => item.classList.remove('active'));
+                    tab.classList.add('active');
+                    const target = tab.getAttribute('data-tab');
+                    tabContentContainer.innerHTML = `<div class="content-section active">${tabContents[target]}</div>`;
+
+                    // Re-add event listeners to buttons inside tabs
+                    const greedyBtn = document.getElementById('run-greedy-inner');
+                    const backtrackingBtn = document.getElementById('run-backtracking-inner');
+                    if (greedyBtn) greedyBtn.addEventListener('click', () => runAlgorithm(greedyRunner));
+                    if (backtrackingBtn) backtrackingBtn.addEventListener('click', () => runAlgorithm(backtrackingRunner));
+                }
+
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => switchTab(tab));
+                });
+                // Initial load
+                switchTab(tabs[0]);
+            }
+
+            function showLoader(show) {
+                const buttons = document.querySelectorAll('button, input');
+                if (show) {
+                    loader.classList.remove('hidden');
+                    loader.classList.add('flex');
+                    buttons.forEach(b => b.disabled = true);
+                } else {
+                    loader.classList.add('hidden');
+                    loader.classList.remove('flex');
+                    buttons.forEach(b => b.disabled = false);
+                }
+            }
+
+            citySlider.addEventListener('input', (e) => {
+                numCities = parseInt(e.target.value);
+                cityCountSpan.textContent = numCities;
+            });
+
+            citySlider.addEventListener('change', generateCities);
+            resetCitiesBtn.addEventListener('click', generateCities);
+
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                // Redraw last known state if available
+            });
+
+            function init() {
+                initChart();
+                resizeCanvas();
+                generateCities();
+                setupTabs();
+            }
+
+            init();
+        });
+    </script>
+</body>
+
+</html>
